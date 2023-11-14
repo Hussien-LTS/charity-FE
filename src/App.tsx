@@ -1,28 +1,48 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Root from "./pages/Root";
 import { CustomProvider } from "rsuite";
-import ShowAllFamilies from "./components/Family/ShowAllFamilies";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import Root from "./pages/Root";
+import AllFamilies from "./components/Family/AllFamilies";
+import FamilyMembers from "./components/Family/FamilyMembers";
+import AddFamily from "./components/Family/AddFamily";
+
 interface AppProps {
   children?: React.ReactNode;
 }
 const router = createBrowserRouter([
   {
-    path: "/dashboard",
+    path: "/",
     element: <Root />,
     children: [
       {
-        path: "/dashboard/fam",
-        element: <ShowAllFamilies />,
+        path: "/Families",
+        element: <AllFamilies />,
+      },
+      {
+        path: "/Families/:id",
+        element: <FamilyMembers />,
+      },
+      {
+        path: "/add-family",
+        element: <AddFamily />,
       },
     ],
   },
 ]);
+const queryClient = new QueryClient();
 
 function App(props: AppProps) {
   return (
     <div>
-      <CustomProvider theme="dark">{props.children}</CustomProvider>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <CustomProvider
+        // theme="dark"
+        >
+          {props.children}
+        </CustomProvider>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </div>
   );
 }
