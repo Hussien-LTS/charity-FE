@@ -3,7 +3,7 @@ import axios from "axios";
 // import { useCookies } from "react-cookie";
 import { useCallback } from "react";
 
-export const apiUrl_ = "http://localhost:3033/api/";
+export const apiUrl_ = "http://localhost:3000/api/";
 
 // helper function to handle getting Authorization headers EXACTLY right
 // function config(access_token: string) {

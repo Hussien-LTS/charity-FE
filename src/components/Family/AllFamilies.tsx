@@ -3,10 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 import useFamiliesAPI from "../../utils/useFamiliesAPI";
+import React from "react";
 
 const { Column, HeaderCell, Cell } = Table;
 function AllFamilies() {
   const navigate = useNavigate();
+  const [sortColumn, setSortColumn] = React.useState();
+  const [sortType, setSortType] = React.useState();
+  const [loading, setLoading] = React.useState(false);
 
   const fetchAllFamiliesData = async () => {
     const response = await fetchAllFamilies();
@@ -24,6 +28,39 @@ function AllFamilies() {
     queryFn: fetchAllFamiliesData,
   });
 
+  const getData = () => {
+    if (sortColumn && sortType) {
+      return allFamiliesData.sort(
+        (a: { [x: string]: unknown }, b: { [x: string]: unknown }) => {
+          let x = a[sortColumn];
+          let y = b[sortColumn];
+          if (typeof x === "string") {
+            x = x.charCodeAt();
+          }
+          if (typeof y === "string") {
+            y = y.charCodeAt();
+          }
+          if (sortType === "asc") {
+            return x - y;
+          } else {
+            return y - x;
+          }
+        }
+      );
+    }
+    return allFamiliesData;
+  };
+  const handleSortColumn = (
+    sortColumn: React.SetStateAction<undefined>,
+    sortType: React.SetStateAction<undefined>
+  ) => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSortColumn(sortColumn);
+      setSortType(sortType);
+    }, 500);
+  };
   return (
     <>
       <main className="d-grid justify-content-center align-items-center mt-4 p-3">
@@ -33,15 +70,19 @@ function AllFamilies() {
           <div>Error fetching products</div>
         ) : allFamiliesData && allFamiliesData.length > 0 ? (
           <Table
-            height={400}
-            data={allFamiliesData}
+            autoHeight={true}
+            data={getData()}
+            sortColumn={sortColumn}
+            sortType={sortType}
+            onSortColumn={handleSortColumn}
+            loading={loading}
             onRowClick={(rowData) => {
               console.log(rowData?.id);
 
               navigate(`/Families/${rowData?.id}`);
             }}
           >
-            <Column width={60} align="center" fixed>
+            <Column width={60} align="center" fixed sortable>
               <HeaderCell>Id</HeaderCell>
               <Cell dataKey="id" />
             </Column>
