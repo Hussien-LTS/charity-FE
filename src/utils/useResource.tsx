@@ -3,7 +3,7 @@ import axios from "axios";
 // import { useCookies } from "react-cookie";
 import { useCallback } from "react";
 
-export const apiUrl_ = "http://localhost:3000/api/";
+export const apiUrl_ = "https://charity-b4ph.onrender.com/api/";
 
 // helper function to handle getting Authorization headers EXACTLY right
 // function config(access_token: string) {
@@ -74,6 +74,7 @@ export default function useResource({
           `${resourceUrl}${suffix}`
           //   config(cookies?.tokens?.access)
         );
+        console.log("fetchResource", response.data);
 
         return response.data;
       } catch (error) {

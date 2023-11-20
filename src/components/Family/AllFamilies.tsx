@@ -14,6 +14,7 @@ function AllFamilies() {
 
   const fetchAllFamiliesData = async () => {
     const response = await fetchAllFamilies();
+    console.log(" response?.families", response);
 
     return response?.families;
   };
@@ -29,6 +30,8 @@ function AllFamilies() {
   });
 
   const getData = () => {
+    console.log("B allFamiliesData", allFamiliesData);
+
     if (sortColumn && sortType) {
       return allFamiliesData.sort(
         (a: { [x: string]: unknown }, b: { [x: string]: unknown }) => {
@@ -48,6 +51,8 @@ function AllFamilies() {
         }
       );
     }
+    console.log("A allFamiliesData", allFamiliesData);
+
     return allFamiliesData;
   };
   const handleSortColumn = (
@@ -68,10 +73,10 @@ function AllFamilies() {
           <div>Loading...</div>
         ) : isError ? (
           <div>Error fetching products</div>
-        ) : allFamiliesData && allFamiliesData.length > 0 ? (
+        ) : allFamiliesData ? (
           <Table
             autoHeight={true}
-            data={getData()}
+            data={!getData() ? [] : getData()}
             sortColumn={sortColumn}
             sortType={sortType}
             onSortColumn={handleSortColumn}
