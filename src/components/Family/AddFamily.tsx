@@ -3,10 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   ButtonToolbar,
+  DatePicker,
   Form,
   FormInstance,
   Input,
+  MaskedInput,
   SelectPicker,
+  Toggle,
 } from "rsuite";
 import { SchemaModel, StringType, ArrayType, NumberType } from "schema-typed";
 import useFamiliesAPI from "../../utils/useFamiliesAPI";
@@ -19,7 +22,6 @@ interface FormValues {
   familyCategory: string;
   familyPriority: string;
   members: FamilyMember[];
-  // Add other fields as needed
 }
 
 interface FamilyMember {
@@ -37,28 +39,6 @@ interface FamilyMember {
   totalIncome?: number;
   educationLevel?: string;
 }
-// const initialFamilyFormValue: FormValues = {
-//   email: "",
-//   address: "",
-//   contactNumber: "",
-//   houseCondition: "",
-//   familyCategory: "",
-//   familyPriority: "",
-//   members: [],
-//   // Initialize other fields
-// };
-
-// // const initialFamilyMember: FamilyMember = {
-// //   firstName: "",
-// //   lastName: "",
-// //   gender: "",
-// //   maritalStatus: "",
-// //   address: "",
-// //   email: "",
-// //   dateOfBirth: "",
-// //   phoneNumber: "",
-// //   // Initialize other fields
-// // };
 
 const initialFamilyMember: FamilyMember = {
   firstName: "",
@@ -69,7 +49,6 @@ const initialFamilyMember: FamilyMember = {
   email: "",
   dateOfBirth: "",
   phoneNumber: "",
-  // Add other fields as needed
 };
 
 const initialFamilyFormValue: FormValues = {
@@ -79,8 +58,7 @@ const initialFamilyFormValue: FormValues = {
   houseCondition: "",
   familyCategory: "",
   familyPriority: "",
-  members: [initialFamilyMember], // Initialize with an empty array containing an initial empty family member
-  // Initialize other fields
+  members: [initialFamilyMember],
 };
 
 const FormComponent: React.FC = () => {
@@ -111,6 +89,27 @@ const FormComponent: React.FC = () => {
     handleAddFamilyMember();
   }, []);
 
+  const option = [
+    {
+      name: "phone number",
+      mask: [
+        /[1-9]/,
+        /\d/,
+        /\d/,
+        " ",
+        /\d/,
+        /\d/,
+        /\d/,
+        " ",
+        /\d/,
+        /\d/,
+        /\d/,
+        /\d/,
+      ],
+      placeholder: "078 123 4567",
+    },
+  ];
+
   const renderFamilyMemberForms = () => {
     return familyMembers.map((member, index) => (
       <div key={index}>
@@ -124,6 +123,7 @@ const FormComponent: React.FC = () => {
             }
           />
         </Form.Group>
+
         <Form.Group controlId={`member${index + 1}LastName`}>
           <Form.ControlLabel>Last Name:</Form.ControlLabel>
           <Form.Control
@@ -133,7 +133,58 @@ const FormComponent: React.FC = () => {
             }
           />
         </Form.Group>
-        {/* ... (similar changes for other form controls) */}
+
+        <Form.Group controlId={`member${index + 1}Email`}>
+          <Form.ControlLabel>Email:</Form.ControlLabel>
+          <Form.Control
+            name={`member${index + 1}Email`}
+            onChange={(value) =>
+              handleFamilyMembersFormChange(index, "email", value)
+            }
+          />
+        </Form.Group>
+
+        <Form.Group controlId={`member${index + 1}DateOfBirth`}>
+          <Form.ControlLabel>Date Of Birth:</Form.ControlLabel>
+          <DatePicker
+            name={`member${index + 1}DateOfBirth`}
+            onChange={(value) =>
+              handleFamilyMembersFormChange(index, "dateOfBirth", value)
+            }
+            oneTap
+            style={{ width: 200 }}
+          />
+        </Form.Group>
+
+        <Form.Group controlId={`member${index + 1}PhoneNumber`}>
+          <Form.ControlLabel>Phone Number:</Form.ControlLabel>
+          <MaskedInput
+            name={`member${index + 1}PhoneNumber`}
+            mask={option[0].mask}
+            keepCharPositions={true}
+            placeholder={option[0].placeholder}
+            // placeholderChar={placeholderChar}
+            style={{ width: 300 }}
+            onChange={(value) =>
+              handleFamilyMembersFormChange(index, "phoneNumber", value)
+            }
+          />
+        </Form.Group>
+
+        <Form.Group controlId={`member${index + 1}gender`}>
+          <Form.ControlLabel>Gender:</Form.ControlLabel>
+          <Form.Control
+            name={`member${index + 1}gender`}
+            accepter={SelectPicker}
+            data={genderData}
+            searchable={false}
+            style={{ width: 224 }}
+            onChange={(value) =>
+              handleFamilyMembersFormChange(index, "gender", value)
+            }
+          />
+        </Form.Group>
+
         <Form.Group controlId={`member${index + 1}Proficient`}>
           <Form.ControlLabel>Proficient:</Form.ControlLabel>
           <Form.Control
@@ -143,6 +194,7 @@ const FormComponent: React.FC = () => {
             }
           />
         </Form.Group>
+
         <Form.Group controlId={`member${index + 1}TotalIncome`}>
           <Form.ControlLabel>Total Income:</Form.ControlLabel>
           <Form.Control
@@ -152,6 +204,7 @@ const FormComponent: React.FC = () => {
             }
           />
         </Form.Group>
+
         <Form.Group controlId={`member${index + 1}EducationLevel`}>
           <Form.ControlLabel>Education Level:</Form.ControlLabel>
           <Form.Control
@@ -161,6 +214,33 @@ const FormComponent: React.FC = () => {
             }
           />
         </Form.Group>
+
+        <Form.Group controlId={`member${index + 1}IsWorking`}>
+          <Form.ControlLabel>
+            Is Working:{" "}
+            <Toggle
+              name={`member${index + 1}IsWorking`}
+              onChange={(value) =>
+                handleFamilyMembersFormChange(index, "isWorking", value)
+              }
+              size="md"
+            />
+          </Form.ControlLabel>
+        </Form.Group>
+
+        <Form.Group controlId={`member${index + 1}IsPersonCharge`}>
+          <Form.ControlLabel>
+            Is Person On Charge:{" "}
+            <Toggle
+              name={`member${index + 1}IsPersonCharge`}
+              onChange={(value) =>
+                handleFamilyMembersFormChange(index, "isPersonCharge", value)
+              }
+              size="md"
+            />
+          </Form.ControlLabel>
+        </Form.Group>
+
         {index !== 0 && (
           <Button
             appearance="link"
@@ -209,17 +289,6 @@ const FormComponent: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // const checkResult = model.check({
-    //   personCharge: formValue.personCharge,
-    //   email: formValue.email,
-    //   address: formValue.address,
-    //   contactNumber: formValue.contactNumber,
-    //   houseCondition: formValue.houseCondition,
-    //   familyCategory: formValue.familyCategory,
-    //   familyPriority: formValue.familyPriority,
-    //   members: formValue.members,
-    // });
-
     if (!formRef.current || !formRef.current.check()) {
       console.error("FORM ERROR!", formRef.current);
       return;
@@ -234,10 +303,7 @@ const FormComponent: React.FC = () => {
       console.log("familyMembers", familyMembers);
       const response = await createFamily(familyForm);
       console.log(response);
-
-      // Handle the response as needed
     } catch (error) {
-      // Handle errors
       console.error("Error making API request:", error);
     }
   };
@@ -248,6 +314,11 @@ const FormComponent: React.FC = () => {
   }));
 
   const familyPriorityData = [1, 2, 3, 4, 5].map((item) => ({
+    label: item,
+    value: item,
+  }));
+
+  const genderData = ["male", "female"].map((item) => ({
     label: item,
     value: item,
   }));
@@ -305,13 +376,11 @@ const FormComponent: React.FC = () => {
       </Form>
       <Form
         layout="inline"
-        // ref={familyMembersFormRef as React.RefObject<FormInstance>}
         ref={(ref) => {
           familyMembersFormRef.current = ref;
         }}
         // model={model}
         onChange={handleFamilyMembersFormChange}
-        // onSubmit={handleSubmit}
         fluid
       >
         {renderFamilyMemberForms()}
