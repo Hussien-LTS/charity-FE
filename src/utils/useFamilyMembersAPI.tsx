@@ -1,14 +1,16 @@
 import useResource from "./useResource";
 
 export default function useFamilyMembersAPI(
+  familyId: undefined | string = undefined
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  id: undefined | string = undefined
+  // familyMemberId: undefined | string = undefined
 ) {
-  const { fetchResource } = useResource({
-    resource: `family/${id}`,
+  const { fetchResource, deleteResource } = useResource({
+    resource: `family-member/${familyId}`,
   });
 
   return {
-    fetchFamilyMembers: fetchResource,
+    fetchAllFamilyMember: fetchResource,
+    deleteFamilyMember: deleteResource,
   };
 }

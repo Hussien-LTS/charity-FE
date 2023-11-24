@@ -23,7 +23,7 @@ interface NavToggleProps {
 }
 const NavToggle: React.FC<NavToggleProps> = ({ expand, onChange }) => {
   return (
-    <Navbar appearance="subtle" className="nav-toggle">
+    <Navbar className="nav-toggle">
       <Nav>
         <Nav.Menu
           noCaret
@@ -81,7 +81,7 @@ const Root = () => {
           <Sidenav
             expanded={expand}
             defaultOpenKeys={["3"]}
-            appearance="subtle"
+            // appearance="inverse"
           >
             <Sidenav.Body>
               <Nav>
@@ -117,9 +117,7 @@ const Root = () => {
         </Sidebar>
 
         <Container>
-          <Header>
-            <h2>Page Title</h2>
-          </Header>
+          <Header></Header>
           <Content>
             <div>
               <Outlet />

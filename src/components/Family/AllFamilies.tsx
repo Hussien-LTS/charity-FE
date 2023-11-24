@@ -68,6 +68,9 @@ function AllFamilies() {
   };
   return (
     <>
+      <div>
+        <h2>All Families </h2>
+      </div>
       <main className="d-grid justify-content-center align-items-center mt-4 p-3">
         {isLoading ? (
           <div>Loading...</div>
@@ -77,74 +80,60 @@ function AllFamilies() {
           <Table
             autoHeight={true}
             data={!getData() ? [] : getData()}
+            bordered
+            hover={true}
+            cellBordered
             sortColumn={sortColumn}
             sortType={sortType}
             onSortColumn={handleSortColumn}
             loading={loading}
             onRowClick={(rowData) => {
-              console.log(rowData?.id);
-
               navigate(`/Families/${rowData?.id}`);
             }}
           >
-            <Column width={60} align="center" fixed sortable>
+            <Column align="center" width={60} fixed sortable>
               <HeaderCell>Id</HeaderCell>
               <Cell dataKey="id" />
             </Column>
 
-            <Column width={150}>
-              <HeaderCell>personCharge</HeaderCell>
+            <Column align="center" width={200}>
+              <HeaderCell>On Charge</HeaderCell>
               <Cell dataKey="personCharge" />
             </Column>
 
-            <Column width={150}>
-              <HeaderCell>email</HeaderCell>
+            <Column align="center" width={220}>
+              <HeaderCell>Email</HeaderCell>
               <Cell dataKey="email" />
             </Column>
 
-            <Column width={100}>
+            <Column align="center" width={250}>
               <HeaderCell>address</HeaderCell>
               <Cell dataKey="address" />
             </Column>
 
-            <Column width={100}>
-              <HeaderCell>contactNumber</HeaderCell>
+            <Column align="center" width={150}>
+              <HeaderCell>Contact Number</HeaderCell>
               <Cell dataKey="contactNumber" />
             </Column>
 
-            <Column width={150}>
-              <HeaderCell>houseCondition</HeaderCell>
+            <Column align="center" width={120}>
+              <HeaderCell>House Condition</HeaderCell>
               <Cell dataKey="houseCondition" />
             </Column>
 
-            <Column width={150}>
-              <HeaderCell>notes</HeaderCell>
+            <Column align="center" width={200}>
+              <HeaderCell>Notes</HeaderCell>
               <Cell dataKey="notes" />
             </Column>
 
-            <Column width={150}>
-              <HeaderCell>familyCategory</HeaderCell>
+            <Column align="center" width={150}>
+              <HeaderCell>Family Category</HeaderCell>
               <Cell dataKey="familyCategory" />
             </Column>
 
-            <Column width={150}>
-              <HeaderCell>familyPriority</HeaderCell>
+            <Column align="center" width={150}>
+              <HeaderCell>Family Priority</HeaderCell>
               <Cell dataKey="familyPriority" />
-            </Column>
-
-            <Column width={80} fixed="right">
-              <HeaderCell>...</HeaderCell>
-
-              <Cell style={{ padding: "6px" }}>
-                {(rowData) => (
-                  <Button
-                    appearance="link"
-                    onClick={() => alert(`id:${rowData.id}`)}
-                  >
-                    Edit
-                  </Button>
-                )}
-              </Cell>
             </Column>
           </Table>
         ) : (

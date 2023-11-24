@@ -74,7 +74,7 @@ export default function useResource({
           `${resourceUrl}${suffix}`
           //   config(cookies?.tokens?.access)
         );
-        console.log("fetchResource", response.data);
+        // console.log("fetchResource", response.data);
 
         return response.data;
       } catch (error) {

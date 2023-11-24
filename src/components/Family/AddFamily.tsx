@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Button,
   ButtonToolbar,
@@ -11,55 +11,31 @@ import {
   SelectPicker,
   Toggle,
 } from "rsuite";
-import { SchemaModel, StringType, ArrayType, NumberType } from "schema-typed";
+import {
+  SchemaModel,
+  StringType,
+  ArrayType,
+  NumberType,
+  BooleanType,
+  DateType,
+  ObjectType,
+} from "schema-typed";
+
 import useFamiliesAPI from "../../utils/useFamiliesAPI";
+import { FamilyMember, FormValues } from "../../config/interfaces";
+import {
+  familyCategoryData,
+  familyPriorityData,
+  genderData,
+  initialFamilyFormValue,
+  initialFamilyMember,
+  maritalStatusData,
+  option,
+} from "../../config";
 
-interface FormValues {
-  email: string;
-  address: string;
-  contactNumber: string;
-  houseCondition: string;
-  familyCategory: string;
-  familyPriority: string;
-  members: FamilyMember[];
-}
-
-interface FamilyMember {
-  firstName: string;
-  lastName: string;
-  gender: string;
-  maritalStatus: string;
-  address: string;
-  email: string;
-  dateOfBirth: string;
-  phoneNumber: string;
-  isPersonCharge?: boolean;
-  isWorking?: boolean;
-  proficient?: string;
-  totalIncome?: number;
-  educationLevel?: string;
-}
-
-const initialFamilyMember: FamilyMember = {
-  firstName: "",
-  lastName: "",
-  gender: "",
-  maritalStatus: "",
-  address: "",
-  email: "",
-  dateOfBirth: "",
-  phoneNumber: "",
-};
-
-const initialFamilyFormValue: FormValues = {
-  email: "",
-  address: "",
-  contactNumber: "",
-  houseCondition: "",
-  familyCategory: "",
-  familyPriority: "",
-  members: [initialFamilyMember],
-};
+const Textarea = React.forwardRef((props, ref) => (
+  <Input {...props} as="textarea" ref={ref} />
+));
 
 const FormComponent: React.FC = () => {
   const formRef = useRef<FormInstance | null>(null);
@@ -68,9 +44,40 @@ const FormComponent: React.FC = () => {
   const [familyForm, setFamilyForm] = useState<FormValues>(
     initialFamilyFormValue
   );
+
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([
     initialFamilyMember,
   ]);
+
+  const { createFamily } = useFamiliesAPI();
+
+  const memberModel = SchemaModel<FamilyMember>({
+    firstName: StringType().isRequired("First name is required!"),
+    lastName: StringType().isRequired("Last name is required!"),
+    gender: StringType().isRequired("Gender is required!"),
+    maritalStatus: StringType().isRequired("Marital status is required!"),
+    address: StringType().isRequired("Address is required!"),
+    email: StringType()
+      .isEmail("Invalid email address!")
+      .isRequired("Email is required!"),
+    dateOfBirth: DateType().isRequired("Date of birth is required!"),
+    phoneNumber: StringType().isRequired("Phone number is required!"),
+    isPersonCharge: BooleanType().isRequired(
+      "Is the person in charge is required!"
+    ),
+    isWorking: BooleanType().isRequired("Is working is required!"),
+    proficient: StringType().isRequired("Proficient is required!"),
+    totalIncome: NumberType().isRequired("Total income is required!"),
+    educationLevel: StringType().isRequired("Education level is required!"),
+  });
+
+  const model = SchemaModel<FormValues>({
+    houseCondition: StringType().isRequired("House condition is required!"),
+    familyCategory: StringType().isRequired("Family category is required!"),
+    familyPriority: NumberType().isRequired("Family priority is required!"),
+    notes: StringType(), // Making validation for 'notes' optional
+    // members: ArrayType(ObjectType().shape( memberModel )),
+  });
 
   const handleAddFamilyMember = () => {
     setFamilyMembers((prevMembers) => [
@@ -85,35 +92,13 @@ const FormComponent: React.FC = () => {
     setFamilyMembers(updatedFamilyMembers);
   };
 
-  useEffect(() => {
-    handleAddFamilyMember();
-  }, []);
-
-  const option = [
-    {
-      name: "phone number",
-      mask: [
-        /[1-9]/,
-        /\d/,
-        /\d/,
-        " ",
-        /\d/,
-        /\d/,
-        /\d/,
-        " ",
-        /\d/,
-        /\d/,
-        /\d/,
-        /\d/,
-      ],
-      placeholder: "078 123 4567",
-    },
-  ];
-
   const renderFamilyMemberForms = () => {
-    return familyMembers.map((member, index) => (
+    return familyMembers.map((_, index) => (
       <div key={index}>
         <hr />
+        <div>
+          <h4>Family member Number {index + 1}</h4>
+        </div>
         <Form.Group controlId={`member${index + 1}FirstName`}>
           <Form.ControlLabel>First Name:</Form.ControlLabel>
           <Form.Control
@@ -156,6 +141,16 @@ const FormComponent: React.FC = () => {
           />
         </Form.Group>
 
+        <Form.Group controlId={`member${index + 1}Address`}>
+          <Form.ControlLabel>Address:</Form.ControlLabel>
+          <Form.Control
+            name={`member${index + 1}Address`}
+            onChange={(value) =>
+              handleFamilyMembersFormChange(index, "address", value)
+            }
+          />
+        </Form.Group>
+
         <Form.Group controlId={`member${index + 1}PhoneNumber`}>
           <Form.ControlLabel>Phone Number:</Form.ControlLabel>
           <MaskedInput
@@ -163,7 +158,6 @@ const FormComponent: React.FC = () => {
             mask={option[0].mask}
             keepCharPositions={true}
             placeholder={option[0].placeholder}
-            // placeholderChar={placeholderChar}
             style={{ width: 300 }}
             onChange={(value) =>
               handleFamilyMembersFormChange(index, "phoneNumber", value)
@@ -171,10 +165,24 @@ const FormComponent: React.FC = () => {
           />
         </Form.Group>
 
-        <Form.Group controlId={`member${index + 1}gender`}>
+        <Form.Group controlId={`member${index + 1}MaritalStatus`}>
+          <Form.ControlLabel>Marital Status:</Form.ControlLabel>
+          <Form.Control
+            name={`member${index + 1}MaritalStatus`}
+            accepter={SelectPicker}
+            data={maritalStatusData}
+            searchable={false}
+            style={{ width: 224 }}
+            onChange={(value) =>
+              handleFamilyMembersFormChange(index, "maritalStatus", value)
+            }
+          />
+        </Form.Group>
+
+        <Form.Group controlId={`member${index + 1}Gender`}>
           <Form.ControlLabel>Gender:</Form.ControlLabel>
           <Form.Control
-            name={`member${index + 1}gender`}
+            name={`member${index + 1}Gender`}
             accepter={SelectPicker}
             data={genderData}
             searchable={false}
@@ -253,26 +261,10 @@ const FormComponent: React.FC = () => {
     ));
   };
 
-  const { createFamily } = useFamiliesAPI();
-
-  const model = SchemaModel({
-    // email: StringType()
-    //   .isEmail("Email must be valid!!!")
-    //   .isRequired("Email is required!"),
-    // address: StringType().isRequired("address is required!"),
-    // contactNumber: StringType().isRequired("contact number is required!"),
-    houseCondition: StringType().isRequired("house condition is required!"),
-    familyCategory: StringType().isRequired("family category is required!"),
-    familyPriority: NumberType().isRequired("family priority is required!"),
-    members: ArrayType().of(
-      StringType("The tag should be a string").isRequired()
-    ),
-  });
-
   const handleFamilyMembersFormChange = (
     index: number,
     field: string,
-    value: any
+    value: string | number | boolean | Date | null
   ) => {
     setFamilyMembers((prevMembers) => {
       const updatedMembers = [...prevMembers];
@@ -295,96 +287,85 @@ const FormComponent: React.FC = () => {
     }
 
     try {
-      setFamilyForm((prevFamilyForm) => ({
-        ...prevFamilyForm,
-        members: familyMembers,
-      }));
-      console.log("familyForm", familyForm);
-      console.log("familyMembers", familyMembers);
-      const response = await createFamily(familyForm);
-      console.log(response);
+      const newFamily = { ...familyForm, members: familyMembers };
+
+      await createFamily(newFamily);
     } catch (error) {
       console.error("Error making API request:", error);
     }
   };
 
-  const familyCategoryData = ["orphans", "poor", "other"].map((item) => ({
-    label: item,
-    value: item,
-  }));
-
-  const familyPriorityData = [1, 2, 3, 4, 5].map((item) => ({
-    label: item,
-    value: item,
-  }));
-
-  const genderData = ["male", "female"].map((item) => ({
-    label: item,
-    value: item,
-  }));
-
   return (
     <>
-      <Form
-        layout="inline"
-        ref={(ref) => {
-          formRef.current = ref;
-        }}
-        model={model}
-        onChange={handleFormChange}
-        onSubmit={handleSubmit}
-        fluid
-      >
-        <Form.Group controlId="houseCondition">
-          <Form.ControlLabel>House Condition: </Form.ControlLabel>
-          <Form.Control name="houseCondition" />
-        </Form.Group>
-        <Form.Group controlId="familyCategory">
-          <Form.ControlLabel>Family Category:</Form.ControlLabel>
-          <Form.Control
-            name="familyCategory"
-            accepter={SelectPicker}
-            data={familyCategoryData}
-            searchable={false}
-            style={{ width: 224 }}
-          />
-        </Form.Group>
-        <Form.Group controlId="familyPriority">
-          <Form.ControlLabel>Family Priority:</Form.ControlLabel>
-          <Form.Control
-            name="familyPriority"
-            accepter={SelectPicker}
-            data={familyPriorityData}
-            searchable={false}
-            style={{ width: 224 }}
-          />
-        </Form.Group>
-        <br />
-        <Form.Group controlId="textarea">
-          <Form.ControlLabel>Enter a Notes: </Form.ControlLabel>
-          <Input as="textarea" name="notes" rows={6} placeholder="Textarea" />
-        </Form.Group>
+      <div>
+        <h2>Add New Family</h2>
+      </div>
+      <div>
+        <Form
+          layout="inline"
+          ref={(ref) => {
+            formRef.current = ref;
+          }}
+          model={model}
+          onChange={handleFormChange}
+          onSubmit={handleSubmit}
+          fluid
+        >
+          <Form.Group controlId="houseCondition">
+            <Form.ControlLabel>House Condition: </Form.ControlLabel>
+            <Form.Control name="houseCondition" />
+          </Form.Group>
 
-        <ButtonToolbar>
-          <Button appearance="primary" type="submit">
-            Submit
-          </Button>
-          <Button appearance="primary" onClick={handleAddFamilyMember}>
-            Add Family Member
-          </Button>
-        </ButtonToolbar>
-      </Form>
-      <Form
-        layout="inline"
-        ref={(ref) => {
-          familyMembersFormRef.current = ref;
-        }}
-        // model={model}
-        onChange={handleFamilyMembersFormChange}
-        fluid
-      >
-        {renderFamilyMemberForms()}
-      </Form>
+          <Form.Group controlId="familyCategory">
+            <Form.ControlLabel>Family Category:</Form.ControlLabel>
+            <Form.Control
+              name="familyCategory"
+              accepter={SelectPicker}
+              data={familyCategoryData}
+              searchable={false}
+              style={{ width: 224 }}
+            />
+          </Form.Group>
+
+          <Form.Group controlId="familyPriority">
+            <Form.ControlLabel>Family Priority:</Form.ControlLabel>
+            <Form.Control
+              name="familyPriority"
+              accepter={SelectPicker}
+              data={familyPriorityData}
+              searchable={false}
+              style={{ width: 224 }}
+            />
+          </Form.Group>
+          <br />
+          <Form.Group controlId="textarea">
+            <Form.ControlLabel>Enter a Notes: </Form.ControlLabel>
+            <Form.Control rows={5} name="notes" accepter={Textarea} />
+          </Form.Group>
+
+          <ButtonToolbar>
+            <Button appearance="primary" type="submit">
+              Submit
+            </Button>
+            <Button appearance="primary" onClick={handleAddFamilyMember}>
+              Add Family Member
+            </Button>
+          </ButtonToolbar>
+        </Form>
+        <Form
+          layout="inline"
+          ref={(ref) => {
+            familyMembersFormRef.current = ref;
+          }}
+          model={memberModel}
+          fluid
+        >
+          <div>
+            <h2>Add New Family members</h2>
+          </div>
+          {renderFamilyMemberForms()}
+        </Form>
+      </div>
     </>
   );
 };
