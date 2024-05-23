@@ -45,7 +45,7 @@ export const option = [
   },
 ];
 
-export const familyCategoryData = ["orphans", "poor", "other"].map((item) => ({
+export const familyCategoryData = ["Orphans", "Poor", "Other"].map((item) => ({
   label: item,
   value: item,
 }));
@@ -55,7 +55,7 @@ export const familyPriorityData = [1, 2, 3, 4, 5].map((item) => ({
   value: item,
 }));
 
-export const genderData = ["male", "female"].map((item) => ({
+export const genderData = ["Male", "Female"].map((item) => ({
   label: item,
   value: item,
 }));

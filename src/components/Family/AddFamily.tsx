@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useState } from "react";
 import {
+  useToaster,
   Button,
   ButtonToolbar,
   DatePicker,
@@ -10,15 +11,14 @@ import {
   MaskedInput,
   SelectPicker,
   Toggle,
+  Message,
 } from "rsuite";
 import {
   SchemaModel,
   StringType,
-  ArrayType,
   NumberType,
   BooleanType,
   DateType,
-  ObjectType,
 } from "schema-typed";
 
 import useFamiliesAPI from "../../utils/useFamiliesAPI";
@@ -32,6 +32,7 @@ import {
   maritalStatusData,
   option,
 } from "../../config";
+import Toast from "../Shared/Toaster";
 
 const Textarea = React.forwardRef((props, ref) => (
   <Input {...props} as="textarea" ref={ref} />
@@ -283,15 +284,39 @@ const FormComponent: React.FC = () => {
   const handleSubmit = async () => {
     if (!formRef.current || !formRef.current.check()) {
       console.error("FORM ERROR!", formRef.current);
+
       return;
     }
 
     try {
       const newFamily = { ...familyForm, members: familyMembers };
 
-      await createFamily(newFamily);
+      const response = await createFamily(newFamily);
+      const flag = response ? response.message : undefined;
+      handleApiCall(flag);
     } catch (error) {
       console.error("Error making API request:", error);
+    }
+  };
+
+  const toaster = useToaster();
+
+  const handleApiCall = async (flag: string) => {
+    if (flag === "Family and Family Members added successfully") {
+      toaster.push(
+        <Message showIcon type="info" closable>
+          Family added <strong>successfully</strong>.
+        </Message>,
+        { placement: "bottomStart", duration: 4000 }
+      );
+    } else if (flag === undefined) {
+      toaster.push(
+        <Message showIcon type="error" closable>
+          Something went <strong>Wrong</strong>.
+        </Message>,
+
+        { placement: "bottomStart", duration: 4000 }
+      );
     }
   };
 
